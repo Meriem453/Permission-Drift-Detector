@@ -1,32 +1,16 @@
-name: Permission Drift Detector
-description: Detects changes in GitHub Actions workflow permissions
+name: "Permission Drift Detector"
+description: "Detects risky GitHub Actions workflow permission changes in pull requests"
+author: "Meriem Zemane"
+branding:
+  icon: shield
+  color: red
+
 inputs:
-  token:
-    description: GitHub token
-    default: ${{ github.token }}
-    required: false
+  github_token:
+    description: "GitHub token to post PR comments"
+    required: true
+    default: "${{ github.token }}"
+
 runs:
-  using: "composite"
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run permission drift checker
-      shell: bash
-      run: bash ${{ github.action_path }}/permissions-checker.sh
-
-    - name: Comment on PR
-      uses: actions/github-script@v7
-      with:
-        github-token: ${{ inputs.token }}
-        script: |
-          const fs = require('fs');
-          const comment = fs.readFileSync('permissions-report.md', 'utf8');
-          if (comment.includes('⚠️')) {
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-          }
+  using: "docker"
+  image: "Dockerfile"
