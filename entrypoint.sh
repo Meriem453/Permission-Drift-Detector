@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+git config --global --add safe.directory /github/workspace
 echo "🔍 Starting Permission Drift Detector with YAML parsing..."
 
 BASE_BRANCH=${GITHUB_BASE_REF:-main}
