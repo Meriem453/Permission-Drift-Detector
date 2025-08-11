@@ -38,7 +38,9 @@ for file in $CHANGED_FILES; do
     # Extract old and new permissions as YAML maps
     OLD_PERMS=$(git show origin/$BASE_BRANCH:$file 2>/dev/null | yq '.permissions' || true)
     NEW_PERMS=$(yq '.permissions' "$file" || true)
-
+    if [[ "$(echo "$NEW_PERMS" | yq 'type')" != "!!map" ]]; then
+        continue
+    fi
     # Skip if no permissions in both versions
     if [[ -z "$OLD_PERMS" && -z "$NEW_PERMS" ]]; then
         continue
