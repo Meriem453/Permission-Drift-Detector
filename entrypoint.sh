@@ -15,9 +15,11 @@ if ! command -v yq &> /dev/null; then
 fi
 
 if [[ -n "$GITHUB_BASE_REF" ]]; then
+  echo "✅ pr"
   git fetch origin "$GITHUB_BASE_REF" --depth=1
   CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
 else
+  echo "✅ commit"
   CHANGED_FILES=$(git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA -- '.github/workflows/*.yml')
 fi
 
