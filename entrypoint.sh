@@ -13,7 +13,8 @@ if ! command -v yq &> /dev/null; then
         -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
 fi
-
+echo "GITHUB_EVENT_BEFORE=$GITHUB_EVENT_BEFORE"
+echo "GITHUB_SHA=$GITHUB_SHA"
 # Decide whether this is a PR or a direct push
 if [[ -n "$GITHUB_BASE_REF" ]]; then
   echo "✅ PR detected (base: $GITHUB_BASE_REF)"
