@@ -14,11 +14,13 @@ if ! command -v yq &> /dev/null; then
     sudo chmod +x /usr/local/bin/yq
 fi
 
-# Fetch base branch
-git fetch origin "$BASE_BRANCH" --depth=1
+if [[ -n "$GITHUB_BASE_REF" ]]; then
+  git fetch origin "$GITHUB_BASE_REF" --depth=1
+  CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
+else
+  CHANGED_FILES=$(git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA -- '.github/workflows/*.yml')
+fi
 
-# Find changed workflow files
-CHANGED_FILES=$(git diff --name-only origin/$BASE_BRANCH...HEAD -- '.github/workflows/*.yml')
 
 if [[ -z "$CHANGED_FILES" ]]; then
     echo "✅ No workflow files changed."
