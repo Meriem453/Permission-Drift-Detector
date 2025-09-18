@@ -3,27 +3,30 @@ set -e
 git config --global --add safe.directory /github/workspace
 echo "🔍 Starting Permission Drift Detector with YAML parsing..."
 
-BASE_BRANCH=${GITHUB_BASE_REF:-main}
 REPORT_FILE="permissions-report.md"
 DRIFT_FOUND=false
 
-# Install yq if not present (needed for YAML parsing)
+# Ensure yq is installed
 if ! command -v yq &> /dev/null; then
     echo "Installing yq..."
-    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-    sudo chmod +x /usr/local/bin/yq
+    curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+        -o /usr/local/bin/yq
+    chmod +x /usr/local/bin/yq
 fi
 
+# Decide whether this is a PR or a direct push
 if [[ -n "$GITHUB_BASE_REF" ]]; then
-  echo "✅ pr"
+  echo "✅ PR detected (base: $GITHUB_BASE_REF)"
   git fetch origin "$GITHUB_BASE_REF" --depth=1
   CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
+  GET_OLD_CMD="git show origin/$GITHUB_BASE_REF"
 else
-  echo "✅ commit"
+  echo "✅ Commit detected"
   CHANGED_FILES=$(git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA -- '.github/workflows/*.yml')
+  GET_OLD_CMD="git show $GITHUB_EVENT_BEFORE"
 fi
 
-
+# No workflow changes
 if [[ -z "$CHANGED_FILES" ]]; then
     echo "✅ No workflow files changed."
     exit 0
@@ -39,13 +42,14 @@ echo "" >> "$REPORT_FILE"
 for file in $CHANGED_FILES; do
     echo "Analyzing: $file"
 
-    # Extract old and new permissions as YAML maps
-    OLD_PERMS=$(git show origin/$BASE_BRANCH:$file 2>/dev/null | yq '.permissions' || true)
+    # Extract old and new permissions
+    OLD_PERMS=$($GET_OLD_CMD:$file 2>/dev/null | yq '.permissions' || true)
     NEW_PERMS=$(yq '.permissions' "$file" || true)
+
+    # Skip files without permissions map
     if [[ "$(echo "$NEW_PERMS" | yq 'type')" != "!!map" ]]; then
         continue
     fi
-    # Skip if no permissions in both versions
     if [[ -z "$OLD_PERMS" && -z "$NEW_PERMS" ]]; then
         continue
     fi
@@ -55,7 +59,7 @@ for file in $CHANGED_FILES; do
         OLD_VAL=$(echo "$OLD_PERMS" | yq ".$key" 2>/dev/null || echo "null")
         NEW_VAL=$(echo "$NEW_PERMS" | yq ".$key" 2>/dev/null || echo "null")
 
-        # Flag only upgrades (e.g., read -> write or null -> write)
+        # Flag only upgrades (read → write, null → write)
         if [[ "$OLD_VAL" != "write" && "$NEW_VAL" == "write" ]]; then
             DRIFT_FOUND=true
             echo "#### File: \`$file\`" >> "$REPORT_FILE"
@@ -65,6 +69,7 @@ for file in $CHANGED_FILES; do
     done < <(echo "$NEW_PERMS" | yq 'keys' | sed 's/- //')
 done
 
+# Final result
 if [[ "$DRIFT_FOUND" = true ]]; then
     echo "⚠️ Permission drift detected!"
 else
