@@ -13,8 +13,11 @@ if ! command -v yq &> /dev/null; then
         -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
 fi
-echo "GITHUB_EVENT_BEFORE=$GITHUB_EVENT_BEFORE"
-echo "GITHUB_SHA=$GITHUB_SHA"
+BEFORE_SHA=$(jq -r .before "$GITHUB_EVENT_PATH")
+AFTER_SHA=$(jq -r .after "$GITHUB_EVENT_PATH")
+
+echo "BEFORE=$BEFORE_SHA"
+echo "AFTER=$AFTER_SHA"
 # Decide whether this is a PR or a direct push
 if [[ -n "$GITHUB_BASE_REF" ]]; then
   echo "✅ PR detected (base: $GITHUB_BASE_REF)"
@@ -22,10 +25,15 @@ if [[ -n "$GITHUB_BASE_REF" ]]; then
   CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
   GET_OLD_CMD="git show origin/$GITHUB_BASE_REF"
 else
+  BEFORE_SHA=$(jq -r .before "$GITHUB_EVENT_PATH")
+  AFTER_SHA=$(jq -r .after "$GITHUB_EVENT_PATH")
   echo "✅ Commit detected"
-  CHANGED_FILES=$(git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA -- '.github/workflows/*.yml')
-  GET_OLD_CMD="git show $GITHUB_EVENT_BEFORE"
+  echo "BEFORE_SHA=$BEFORE_SHA"
+  echo "AFTER_SHA=$AFTER_SHA"
+  CHANGED_FILES=$(git diff --name-only $BEFORE_SHA $AFTER_SHA -- '.github/workflows/*.yml')
+  GET_OLD_CMD="git show $BEFORE_SHA"
 fi
+
 
 # No workflow changes
 if [[ -z "$CHANGED_FILES" ]]; then
