@@ -2,7 +2,7 @@ FROM alpine:3.20
 
 # Install dependencies
 RUN apk add --no-cache bash git curl
-
+RUN apk add --no-cache bash git curl jq
 # Install yq safely (detect HTML instead of binary)
 RUN curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
     -o /usr/local/bin/yq \
