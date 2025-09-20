@@ -15,7 +15,7 @@ if ! command -v yq &> /dev/null; then
     chmod +x /usr/local/bin/yq
 fi
 
-BEFORE_SHA=$(jq -r .before "$GITHUB_EVENT_PATH")
+
 AFTER_SHA=$(jq -r .after "$GITHUB_EVENT_PATH")
 
 # Decide whether this is a PR or a direct push
@@ -26,8 +26,7 @@ if [[ -n "$GITHUB_BASE_REF" ]]; then
   GET_OLD_CMD="git show origin/$GITHUB_BASE_REF"
 else
   echo "✅ Commit detected"
-  echo "BEFORE_SHA=$BEFORE_SHA"
-  echo "AFTER_SHA=$AFTER_SHA"
+  BEFORE_SHA=$(jq -r .before "$GITHUB_EVENT_PATH")
   CHANGED_FILES=$(git diff --name-only $BEFORE_SHA $AFTER_SHA -- '.github/workflows/*.yml')
   GET_OLD_CMD="git show $BEFORE_SHA"
 fi
