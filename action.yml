@@ -4,6 +4,9 @@ author: "Meriem Zemane"
 branding:
   icon: shield
   color: red
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 permissions:
   contents: write
   pull-requests: write
