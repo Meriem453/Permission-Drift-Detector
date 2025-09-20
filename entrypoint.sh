@@ -5,6 +5,7 @@ echo "🔍 Starting Permission Drift Detector..."
 
 REPORT_FILE="permissions-report.md"
 DRIFT_FOUND=false
+export GH_TOKEN="$INPUT_GITHUB_TOKEN"
 
 # Ensure yq is installed
 if ! command -v yq &> /dev/null; then
