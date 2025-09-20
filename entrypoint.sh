@@ -19,7 +19,7 @@ fi
 AFTER_SHA=$(jq -r .after "$GITHUB_EVENT_PATH")
 
 # Decide whether this is a PR or a direct push
-if [[ -n "$GITHUB_BASE_REF" || "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+if [[ -n "$GITHUB_BASE_REF" ]]; then
   echo "✅ PR detected (base: $GITHUB_BASE_REF)"
   git fetch origin "$GITHUB_BASE_REF" --depth=1
   CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
