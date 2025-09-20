@@ -23,7 +23,7 @@ if [[ -n "$GITHUB_BASE_REF" ]]; then
   echo "✅ PR detected (base: $GITHUB_BASE_REF)"
   git fetch origin "$GITHUB_BASE_REF" --depth=1
   CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD -- '.github/workflows/*.yml')
-  GET_OLD_CMD="git show origin/$GITHUB_BASE_REF:$file"
+  GET_OLD_CMD="git show origin/$GITHUB_BASE_REF"
 else
   echo "✅ Commit detected"
   BEFORE_SHA=$(jq -r .before "$GITHUB_EVENT_PATH")
