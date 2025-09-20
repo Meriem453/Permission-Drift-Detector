@@ -85,7 +85,7 @@ if [[ "$DRIFT_FOUND" = true ]]; then
         gh api repos/${GITHUB_REPOSITORY}/issues \
             -f title="⚠️ Permission Drift Detected" \
             -f body="$(cat $REPORT_FILE)" \
-            -f assignees="$OWNER"
+            -f assignees[]="$OWNER"
     fi
 else
     echo "✅ No permission upgrades detected."
