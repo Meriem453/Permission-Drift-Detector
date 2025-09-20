@@ -17,7 +17,7 @@ fi
 
 
 AFTER_SHA=$(jq -r .after "$GITHUB_EVENT_PATH")
-
+echo "baseref=$GITHUB_BASE_REF"
 # Decide whether this is a PR or a direct push
 if [[ -n "$GITHUB_BASE_REF" ]]; then
   echo "✅ PR detected (base: $GITHUB_BASE_REF)"
