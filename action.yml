@@ -4,6 +4,10 @@ author: "Meriem Zemane"
 branding:
   icon: shield
   color: red
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 inputs:
   github_token:
