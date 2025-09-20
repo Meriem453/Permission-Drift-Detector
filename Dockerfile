@@ -13,10 +13,10 @@ RUN curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_
        fi
 
 # Install GitHub CLI (gh)
-RUN curl -sSL https://github.com/cli/cli/releases/latest/download/gh_2.63.2_linux_amd64.tar.gz \
-    | tar -xz \
+RUN curl -sSL -o gh.tar.gz https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_linux_amd64.tar.gz \
+    && tar -xzf gh.tar.gz \
     && mv gh_*/bin/gh /usr/local/bin/ \
-    && rm -rf gh_*
+    && rm -rf gh_* gh.tar.gz
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
