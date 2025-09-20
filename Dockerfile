@@ -1,8 +1,17 @@
 FROM alpine:3.20
 
-# Install curl, bash, git, jq, yq, and GitHub CLI
-RUN apk add --no-cache curl bash git jq yq \
-    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+# Install dependencies
+RUN apk add --no-cache bash git curl
+RUN apk add --no-cache bash git curl jq
+# Install yq safely (detect HTML instead of binary)
+RUN curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+    -o /usr/local/bin/yq \
+    && chmod +x /usr/local/bin/yq \
+    && if head -n 1 /usr/local/bin/yq | grep -q DOCTYPE; then \
+         echo "❌ Failed to download yq binary (got HTML instead). Exiting."; \
+         exit 1; \
+       fi
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
        tee /etc/apk/keys/githubcli-archive-keyring.gpg > /dev/null \
     && echo "https://cli.github.com/packages" >> /etc/apk/repositories \
     && apk add --no-cache gh
