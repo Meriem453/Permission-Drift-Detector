@@ -1,7 +1,7 @@
 FROM alpine:3.20
 
-# Install dependencies (combine into one layer)
-RUN apk add --no-cache bash git curl jq gh
+# Install dependencies
+RUN apk add --no-cache bash git curl jq
 
 # Install yq safely
 RUN curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
@@ -12,8 +12,15 @@ RUN curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_
          exit 1; \
        fi
 
+# Install GitHub CLI (gh)
+RUN curl -sSL https://github.com/cli/cli/releases/latest/download/gh_2.63.2_linux_amd64.tar.gz \
+    | tar -xz \
+    && mv gh_*/bin/gh /usr/local/bin/ \
+    && rm -rf gh_*
+
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
+
