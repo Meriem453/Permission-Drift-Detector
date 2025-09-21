@@ -1,7 +1,5 @@
 # 🔍 Permission Drift Detector
 
-&#x20;
-
 A GitHub Action that detects **permission drift** in GitHub Actions workflow files. It compares workflow permissions between commits or pull requests and reports upgrades (for example: `read` → `write`) so reviewers and owners can catch unintended privilege escalations.
 
 ---
@@ -25,35 +23,43 @@ A GitHub Action that detects **permission drift** in GitHub Actions workflow fil
 
 ## 🚀 Quick start
 
-Add this workflow to your repository (recommended: run on pull requests only to avoid duplicate runs):
+Here’s an example workflow using the **Permission Drift Detector**:
 
 ```yaml
-name: Permission Drift Detector
+name: Test Permission Drift
 
 on:
+  push:
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
+    paths:
+      - ".github/workflows/*.yml"
 
 jobs:
-  detect-drift:
+  test-permission-drift:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Run Permission Drift Detector
-        uses: your-username/permission-drift-detector@v1
+      - name: Checkout the action
+        uses: actions/checkout@v4
+        with:
+          repository: Meriem453/Permission-Drift-Detector
+          path: ./Permission-Drift-Detector
+
+      - name: Run action locally
+        uses: ./Permission-Drift-Detector
         with:
           github_token: ${{ github.token }}
 ```
 
-Replace `your-username/permission-drift-detector@v1` with the action reference you publish.
+Replace `Meriem453/Permission-Drift-Detector` with the path to your published action release (e.g., `Meriem453/Permission-Drift-Detector@v1`).
 
 ---
 
