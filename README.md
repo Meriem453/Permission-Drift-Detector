@@ -26,37 +26,31 @@ A GitHub Action that detects **permission drift** in GitHub Actions workflow fil
 Here’s an example workflow using the **Permission Drift Detector**:
 
 ```yaml
-name: Test Permission Drift
+name: Permission Drift Detector
 
 on:
-  push:
   pull_request:
     paths:
       - ".github/workflows/*.yml"
 
 jobs:
-  test-permission-drift:
+  detect-drift:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
       issues: write
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Checkout the action
-        uses: actions/checkout@v4
+      - name: Run Permission Drift Detector
+        uses: Meriem453/Permission-Drift-Detector@v1.0.0-beta
         with:
-          repository: Meriem453/Permission-Drift-Detector
-          path: ./Permission-Drift-Detector
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run action locally
-        uses: ./Permission-Drift-Detector
-        with:
-          github_token: ${{ github.token }}
 ```
 
 Replace `Meriem453/Permission-Drift-Detector` with the path to your published action release (e.g., `Meriem453/Permission-Drift-Detector@v1`).
